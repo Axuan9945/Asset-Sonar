@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="AngleSharp" Version="1.3.0" />
+		<PackageReference Include="ClosedXML" Version="0.105.0" />
+		<PackageReference Include="EPPlus" Version="8.2.1" />
+		<PackageReference Include="QuestPDF" Version="2025.7.2" />
+		<PackageReference Include="System.Diagnostics.PerformanceCounter" Version="9.0.9" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\ItAssetTool.Core\ItAssetTool.Core.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Reference Include="System.Management" />
+	</ItemGroup>
+
+</Project>

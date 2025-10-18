@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "ItAssetTool (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "ItAssetTool (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

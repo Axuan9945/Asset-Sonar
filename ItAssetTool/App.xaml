@@ -1,0 +1,84 @@
+<Application
+    x:Class="ItAssetTool.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:ItAssetTool"
+    xmlns:vm="using:ItAssetTool.ViewModels"
+    xmlns:conv="using:ItAssetTool.Converters">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <conv:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+
+            <conv:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+            <Style x:Key="ActionCardBorderStyle" TargetType="Border">
+                <Setter Property="Padding" Value="20"/>
+                <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}"/>
+                <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}"/>
+
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="CornerRadius" Value="8"/>
+            </Style>
+
+            <Style x:Key="SettingsListItemContainerStyle" TargetType="ListViewItem">
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="Background" Value="{ThemeResource LayerFillColorDefaultBrush}"/>
+
+                <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="CornerRadius" Value="4"/>
+                <Setter Property="Margin" Value="0,0,0,8"/>
+                <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            </Style>
+
+            <Style x:Key="GridViewItemStyleNoHover" TargetType="GridViewItem">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Margin" Value="0,0,12,12"/>
+            </Style>
+            <Style x:Key="SummaryCardBorderStyle" TargetType="Border">
+
+                <Setter Property="Width" Value="280"/>
+                <Setter Property="MinHeight" Value="160"/>
+                <Setter Property="Padding" Value="20"/>
+                <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}"/>
+                <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+
+                <Setter Property="CornerRadius" Value="8"/>
+            </Style>
+            <Style x:Key="SummaryCardStackPanelStyle" TargetType="StackPanel">
+                <Setter Property="Spacing" Value="4"/>
+            </Style>
+            <Style x:Key="SummaryCardIconStyle" TargetType="FontIcon">
+
+                <Setter Property="FontFamily" Value="Segoe Fluent Icons"/>
+                <Setter Property="FontSize" Value="16"/>
+                <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}"/>
+            </Style>
+            <Style x:Key="SummaryCardHeaderTextStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="14"/>
+
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}"/>
+            </Style>
+            <Style x:Key="SummaryCardTitleStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="20"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="Margin" Value="0"/>
+            </Style>
+            <Style x:Key="SummaryCardSubtitleStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}"/>
+                <Setter 
+                Property="Margin" Value="0"/>
+            </Style>
+
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

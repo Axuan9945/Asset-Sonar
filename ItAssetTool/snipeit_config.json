@@ -1,0 +1,43 @@
+{
+  "CATEGORY_ID_MAP": {
+    "台式机": 3,
+    "笔记本电脑": 4,
+    "显示器": 5,
+    "服务器": 6
+  },
+  "COMPONENT_CATEGORY_ID_MAP": {
+    "处理器": 7,
+    "显卡": 8,
+    "内存": 9,
+    "硬盘": 10,
+    "主板/整机": 11,
+    "网卡": 14
+  },
+  "ACCESSORY_CATEGORY_ID_MAP": {
+    "键盘": 15,
+    "鼠标": 16
+  },
+  "ASSET_TAG_PREFIX": "DOZ",
+  "CATEGORY_CODE_MAP": {
+    "台式机": "TSJ",
+    "笔记本电脑": "BJB",
+    "显示器": "XSQ",
+    "服务器": "FWQ"
+  },
+  "MANUFACTURER_CLEANUP_MAP": {
+    "Micro-Star International Co., Ltd.": "MSI",
+    "Dell Inc.": "Dell",
+    "Kingston": "Kingston"
+  },
+  "IGNORE_KEYWORDS": [
+    "virtual",
+    "vmware",
+    "hyper-v",
+    "oray",
+    "gameviewer",
+    "parsec",
+    "tap-windows",
+    "microsoft basic display",
+    "remote display"
+  ]
+}
