@@ -51,13 +51,17 @@ Asset Sonar 是一款基于 WinUI 3 和 .NET 8 构建的强大应用程序。它
 
 📸 应用截图
 -------------
-
-*（建议在此处添加应用截图，展示主界面、网络扫描、配置页面等）*
-
 主界面: 清晰展示扫描模块、操作按钮、日志输出和详细硬件列表。
+<img width="1284" height="832" alt="image" src="https://github.com/user-attachments/assets/c0856488-a721-4eb2-a5d8-07228f1cd063" />
+
 网络扫描: 以卡片形式直观显示局域网中的在线设备。
+<img width="1284" height="832" alt="image" src="https://github.com/user-attachments/assets/0a44d6c0-b70c-4a22-a1d4-efe5e30f6a23" />
+
 配置页面: 图形化管理 Snipe-IT 连接信息和 ID 映射。
+<img width="1284" height="832" alt="image" src="https://github.com/user-attachments/assets/614385e6-2f01-4c5f-90be-4165a3a92c26" />
+
 关于页面: 展示应用、制作人及开源协议信息。
+<img width="1284" height="832" alt="image" src="https://github.com/user-attachments/assets/4c0cddec-8ed7-4e9c-a509-43154a7c8953" />
 
 🛠️ 技术栈与架构
 ----------------
