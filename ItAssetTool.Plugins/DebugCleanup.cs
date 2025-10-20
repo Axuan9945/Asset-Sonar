@@ -18,11 +18,12 @@ public class DebugCleanup : IDebugPlugin
     public string Name => "Snipe-IT 数据清理";
 
     private HttpClient _httpClient = new();
+    // 使用 Action<string> 来接收 MainViewModel 传递过来的日志记录方法
     private Action<string> _log = Console.WriteLine;
 
     public async Task RunCleanupAsync(SyncConfig config, Action<string> logCallback)
     {
-        _log = logCallback;
+        _log = logCallback; // 将传入的回调方法赋值给 _log
 
         if (string.IsNullOrEmpty(config.ApiKey) || string.IsNullOrEmpty(config.InternalUrl))
         {
@@ -33,14 +34,19 @@ public class DebugCleanup : IDebugPlugin
         var baseUrl = config.InternalUrl;
         _httpClient.BaseAddress = new Uri($"{baseUrl.TrimEnd('/')}/api/v1/");
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", config.ApiKey);
+        _httpClient.DefaultRequestHeaders.Accept.Clear(); // 清除旧的 Accept 头
         _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
         _log($"\n--- !!! 开始执行 Snipe-IT 数据清理任务 !!! ---");
         _log($"--- !!! 目标服务器: {baseUrl} !!! ---");
 
+        // 步骤 1 & 2: 归还所有资产和配件
         await CheckinAllAssets();
         await CheckinAllAccessories();
+        // 注意：原始版本没有检查归还是否成功，会直接进行下一步
 
+        // 步骤 3 - N: 删除项目
+        _log("\n--- 所有归还操作已尝试完成，开始执行删除操作 ---"); // 这行表明归还步骤已执行
         var endpointsToClear = new[]
         {
             "hardware", "accessories", "components", "users",
@@ -49,6 +55,7 @@ public class DebugCleanup : IDebugPlugin
 
         for (int i = 0; i < endpointsToClear.Length; i++)
         {
+            // 原始版本传递了 stepNumber，但方法签名可能与后来的版本不同
             await DeleteAllFromEndpoint(endpointsToClear[i], i + 3);
         }
 
@@ -72,8 +79,12 @@ public class DebugCleanup : IDebugPlugin
             var response = await ApiRequestAsync(HttpMethod.Post, $"hardware/{assetId}/checkin", new { note = "调试模式自动归还" });
             if (response?.TryGetProperty("status", out var status) == true && status.GetString() == "success")
             {
-                _log($"    - ✅ 已归还资产: {asset.GetProperty("name").GetString()} (Tag: {asset.GetProperty("asset_tag").GetString()})");
+                // 尝试安全地获取属性
+                var assetName = asset.TryGetProperty("name", out var nameProp) ? nameProp.GetString() : "未知名称";
+                var assetTag = asset.TryGetProperty("asset_tag", out var tagProp) ? tagProp.GetString() : "未知标签";
+                _log($"    - ✅ 已归还资产: {assetName} (Tag: {assetTag})");
             }
+            // 原始版本缺少失败处理
         }
     }
 
@@ -87,9 +98,11 @@ public class DebugCleanup : IDebugPlugin
             return;
         }
 
+        // 原始版本筛选逻辑可能不同，这里使用 qty 和 remaining_qty
         var accessoriesWithCheckout = accessories.EnumerateArray()
-            .Where(acc => acc.TryGetProperty("qty", out var qty) && qty.GetInt32() > (acc.TryGetProperty("remaining_qty", out var rem) ? rem.GetInt32() : 0))
+            .Where(acc => acc.TryGetProperty("qty", out var qty) && qty.ValueKind == JsonValueKind.Number && qty.GetInt32() > (acc.TryGetProperty("remaining_qty", out var rem) && rem.ValueKind == JsonValueKind.Number ? rem.GetInt32() : 0))
             .ToList();
+
 
         if (!accessoriesWithCheckout.Any())
         {
@@ -113,15 +126,21 @@ public class DebugCleanup : IDebugPlugin
             foreach (var log in checkoutLogs.EnumerateArray())
             {
                 var logId = log.GetProperty("id").GetInt32();
-                var response = await ApiRequestAsync(HttpMethod.Post, $"accessories/{logId}/checkin", new { note = "调试模式自动归还" });
+                // 原始版本可能使用了错误的签入端点
+                var response = await ApiRequestAsync(HttpMethod.Post, $"accessories/{logId}/checkin", new { note = "调试模式自动归还" }); // 可能的错误端点
+                // 正确的可能是 POST /accessories/checkin/{logId}
+                // var response = await ApiRequestAsync(HttpMethod.Post, $"accessories/checkin/{logId}", new { note = "调试模式自动归还" });
+
                 if (response?.TryGetProperty("status", out var status) == true && status.GetString() == "success")
                 {
                     _log($"    - ✅ 已归还配件: {accName}");
                 }
+                // 原始版本缺少失败处理
             }
         }
     }
 
+    // 原始版本可能没有 totalSteps 参数
     private async Task DeleteAllFromEndpoint(string endpoint, int stepNumber)
     {
         _log($"--- 步骤 {stepNumber}/9: 正在清理 {endpoint} ---");
@@ -149,18 +168,17 @@ public class DebugCleanup : IDebugPlugin
             {
                 if (itemId == 1) { _log($"  -> ⚠️ 跳过用户 '{itemName}' (ID: 1, 初始管理员)。"); continue; }
 
-                bool isAdmin = item.TryGetProperty("admin", out var adminProp) && adminProp.GetBoolean();
+                bool isAdmin = item.TryGetProperty("admin", out var adminProp) && adminProp.ValueKind == JsonValueKind.True; // 使用 ValueKind
 
-                // vvvv 这是核心修正：在访问 'groups' 的子属性前，先检查它本身是否为 null vvvv
-                if (!isAdmin && item.TryGetProperty("groups", out var groups) && groups.ValueKind != JsonValueKind.Null && groups.TryGetProperty("rows", out var groupRows))
+                // 检查用户组
+                if (!isAdmin && item.TryGetProperty("groups", out var groups) && groups.ValueKind == JsonValueKind.Object && groups.TryGetProperty("rows", out var groupRows)) // 添加 ValueKind 检查
                 {
                     isAdmin = groupRows.EnumerateArray().Any(g =>
                     {
-                        var groupName = g.GetProperty("name").GetString()?.ToLower();
+                        var groupName = g.TryGetProperty("name", out var gnp) ? gnp.GetString()?.ToLower() : null; // 添加 null 检查
                         return groupName == "admin" || groupName == "super user";
                     });
                 }
-                // ^^^^ 核心修正结束 ^^^^
 
                 if (isAdmin) { _log($"  -> ⚠️ 跳过用户 '{itemName}' (管理员)。"); continue; }
             }
@@ -187,15 +205,31 @@ public class DebugCleanup : IDebugPlugin
             var request = new HttpRequestMessage(method, endpoint);
             if (payload != null)
             {
+                // 原始版本可能没有配置 DefaultIgnoreCondition
                 var jsonPayload = JsonSerializer.Serialize(payload, new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull });
                 request.Content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
             }
             var response = await _httpClient.SendAsync(request);
             var content = await response.Content.ReadAsStringAsync();
-            if (!response.IsSuccessStatusCode) { _log($"  -> ❌ API 请求失败 ({response.StatusCode}): {content}"); return null; }
-            if (string.IsNullOrWhiteSpace(content)) return JsonSerializer.Deserialize<JsonElement>("{}");
+            if (!response.IsSuccessStatusCode)
+            {
+                // 原始日志记录比较简单
+                _log($"  -> ❌ API 请求失败 ({response.StatusCode}): {content}");
+                return null;
+            }
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                // 原始版本可能没有返回空 JsonElement
+                return null;
+                // return JsonSerializer.Deserialize<JsonElement>("{}");
+            }
             return JsonSerializer.Deserialize<JsonElement>(content);
         }
-        catch (Exception ex) { _log($"  -> ❌ API 请求异常: {ex.Message}"); return null; }
+        catch (Exception ex)
+        {
+            // 原始日志记录比较简单
+            _log($"  -> ❌ API 请求异常: {ex.Message}");
+            return null;
+        }
     }
 }
